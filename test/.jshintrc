@@ -1,0 +1,13 @@
+{
+  "node": true,
+  "strict": true,
+  "expr": true,
+  "predef": [
+    "before",
+    "beforeEach",
+    "after",
+    "afterEach",
+    "describe",
+    "it"
+  ]
+}

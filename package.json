@@ -1,0 +1,32 @@
+{
+  "name": "nodemailer-mandrill-transport",
+  "version": "0.1.0",
+  "description": "Mandrill transport for Nodemailer",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:RebelMail/nodemailer-mandrill-transport.git"
+  },
+  "keywords": [
+    "nodemailer",
+    "mandrill"
+  ],
+  "author": "RebelMail",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RebelMail/nodemailer-mandrill-transport/issues"
+  },
+  "homepage": "https://github.com/RebelMail/nodemailer-mandrill-transport",
+  "dependencies": {
+    "email-addresses": "^2.0.1",
+    "mandrill-api": "^1.0.41"
+  },
+  "devDependencies": {
+    "chai": "^2.2.0",
+    "mocha": "^2.2.1",
+    "sinon": "^1.14.1"
+  }
+}
