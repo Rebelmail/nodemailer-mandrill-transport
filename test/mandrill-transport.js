@@ -18,27 +18,29 @@ describe('MandrillTransport', function() {
     var transport = mandrillTransport();
     var client = transport.mandrillClient;
 
-    var stub = sinon.stub(client.messages, 'send', function(data, resolve, reject) {
+    var stub = sinon.stub(client.messages, 'send', function(data, resolve) {
       var message = data.message;
       expect(message).to.exist;
-      expect(message.to.length).to.equal(1);
-      expect(message.to[0].name).to.equal('User');
-      expect(message.to[0].email).to.equal('user@example.com');
-      expect(message.from_name).to.equal('User');
-      expect(message.from_email).to.equal('user@example.com');
-      expect(message.subject).to.equal('Hello');
-      expect(message.text).to.equal('How are you?');
-      expect(message.html).to.equal('<p>How are you?</p>');
+      expect(message.to.length).to.equal(2);
+      expect(message.to[0].name).to.equal('SpongeBob SquarePants');
+      expect(message.to[0].email).to.equal('spongebob@bikini.bottom');
+      expect(message.to[1].name).to.equal('Patrick Star');
+      expect(message.to[1].email).to.equal('patrick@bikini.bottom');
+      expect(message.from_name).to.equal('Gary the Snail');
+      expect(message.from_email).to.equal('gary@bikini.bottom');
+      expect(message.subject).to.equal('Meow...');
+      expect(message.text).to.equal('Meow!');
+      expect(message.html).to.equal('<p>Meow!</p>');
       resolve([{ _id: 'fake-id', status: 'sent' }]);
     });
 
     transport.send({
       data: {
-        to: 'User <user@example.com>',
-        from: 'User <user@example.com>',
-        subject: 'Hello',
-        text: 'How are you?',
-        html: '<p>How are you?</p>'
+        to: 'SpongeBob SquarePants <spongebob@bikini.bottom>, Patrick Star <patrick@bikini.bottom>',
+        from: 'Gary the Snail <gary@bikini.bottom>',
+        subject: 'Meow...',
+        text: 'Meow!',
+        html: '<p>Meow!</p>'
       }
     }, function(err, info) {
       expect(stub.calledOnce).to.be.true;
