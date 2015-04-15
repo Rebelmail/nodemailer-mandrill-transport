@@ -2,6 +2,9 @@
 
 A Mandrill transport for Nodemailer.
 
+[![Build Status](https://travis-ci.org/RebelMail/nodemailer-mandrill-transport.svg?branch=sm-readme)](https://travis-ci.org/RebelMail/nodemailer-mandrill-transport)
+[![NPM version](https://badge.fury.io/js/nodemailer-mandrill-transport.png)](http://badge.fury.io/js/nodemailer-mandrill-transport)
+
 ## Example
 
 ```javascript
