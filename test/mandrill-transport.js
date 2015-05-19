@@ -82,7 +82,7 @@ describe('MandrillTransport', function() {
 
     it('scheduled response', function(done) {
       status = 'scheduled';
-      transport.send(payload, errorCallbackFactory(done));
+      transport.send(payload, successCallbackFactory(done));
     });
 
     it('invalid response', function(done) {
@@ -92,7 +92,7 @@ describe('MandrillTransport', function() {
 
     it('rejected response', function(done) {
       status = 'rejected';
-      transport.send(payload, errorCallbackFactory(done));
+      transport.send(payload, successCallbackFactory(done));
     });
   });
 });
