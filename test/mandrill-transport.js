@@ -42,7 +42,7 @@ describe('MandrillTransport', function() {
       expect(message.subject).to.equal('Meow...');
       expect(message.text).to.equal('Meow!');
       expect(message.html).to.equal('<p>Meow!</p>');
-      resolve([{ status: status }]);
+      resolve([{ _id: 'fake-id', status: status }]);
     });
 
     after(function() {
@@ -59,6 +59,7 @@ describe('MandrillTransport', function() {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(1);
+        expect(info.messageId).to.equal('fake-id');
         done();
       });
     });
@@ -69,6 +70,7 @@ describe('MandrillTransport', function() {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(1);
+        expect(info.messageId).to.equal('fake-id');
         done();
       });
     });
@@ -79,6 +81,7 @@ describe('MandrillTransport', function() {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(1);
+        expect(info.messageId).to.equal('fake-id');
         done();
       });
     });
