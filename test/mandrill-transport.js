@@ -59,6 +59,7 @@ describe('MandrillTransport', function() {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(1);
+        expect(info.rejected.length).to.equal(0);
         expect(info.messageId).to.equal('fake-id');
         done();
       });
@@ -70,6 +71,7 @@ describe('MandrillTransport', function() {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(1);
+        expect(info.rejected.length).to.equal(0);
         expect(info.messageId).to.equal('fake-id');
         done();
       });
@@ -81,6 +83,7 @@ describe('MandrillTransport', function() {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(1);
+        expect(info.rejected.length).to.equal(0);
         expect(info.messageId).to.equal('fake-id');
         done();
       });
@@ -91,6 +94,7 @@ describe('MandrillTransport', function() {
       transport.send(payload, function(err, info) {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
+        expect(info.accepted.length).to.equal(0);
         expect(info.rejected.length).to.equal(1);
         done();
       });
@@ -101,6 +105,7 @@ describe('MandrillTransport', function() {
       transport.send(payload, function(err, info) {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
+        expect(info.accepted.length).to.equal(0);
         expect(info.rejected.length).to.equal(1);
         done();
       });
