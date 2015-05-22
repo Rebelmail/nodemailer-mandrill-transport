@@ -53,46 +53,57 @@ describe('MandrillTransport', function() {
       stub.reset();
     });
 
-    function successCallbackFactory(done) {
-      return function successCallback(err, info) {
-        expect(stub.calledOnce).to.be.true;
-        expect(err).to.not.exist;
-        expect(info.messageId).to.equal('fake-id');
-        done();
-      };
-    }
-
-    function errorCallbackFactory(done) {
-      return function errorCallback(err) {
-        expect(stub.calledOnce).to.be.true;
-        expect(err).to.exist;
-        done();
-      };
-    }
-
     it('sent response', function(done) {
       status = 'sent';
-      transport.send(payload, successCallbackFactory(done));
+      transport.send(payload, function(err, info) {
+        expect(err).to.not.exist;
+        expect(stub.calledOnce).to.be.true;
+        expect(info.accepted.length).to.equal(1);
+        expect(info.messageId).to.equal('fake-id');
+        done();
+      });
     });
 
     it('queued response', function(done) {
       status = 'queued';
-      transport.send(payload, successCallbackFactory(done));
+      transport.send(payload, function(err, info) {
+        expect(err).to.not.exist;
+        expect(stub.calledOnce).to.be.true;
+        expect(info.accepted.length).to.equal(1);
+        expect(info.messageId).to.equal('fake-id');
+        done();
+      });
     });
 
     it('scheduled response', function(done) {
       status = 'scheduled';
-      transport.send(payload, errorCallbackFactory(done));
+      transport.send(payload, function(err, info) {
+        expect(err).to.not.exist;
+        expect(stub.calledOnce).to.be.true;
+        expect(info.accepted.length).to.equal(1);
+        expect(info.messageId).to.equal('fake-id');
+        done();
+      });
     });
 
     it('invalid response', function(done) {
       status = 'invalid';
-      transport.send(payload, errorCallbackFactory(done));
+      transport.send(payload, function(err, info) {
+        expect(err).to.not.exist;
+        expect(stub.calledOnce).to.be.true;
+        expect(info.rejected.length).to.equal(1);
+        done();
+      });
     });
 
     it('rejected response', function(done) {
       status = 'rejected';
-      transport.send(payload, errorCallbackFactory(done));
+      transport.send(payload, function(err, info) {
+        expect(err).to.not.exist;
+        expect(stub.calledOnce).to.be.true;
+        expect(info.rejected.length).to.equal(1);
+        done();
+      });
     });
   });
 });
