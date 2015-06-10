@@ -14,6 +14,16 @@ describe('MandrillTransport', function() {
     expect(transport.version).to.equal(packageData.version);
   });
 
+  it('should expose preserve_recipients', function() {
+    var transport = mandrillTransport();
+    expect(transport.preserve_recipients).to.equal(true);
+  });
+
+  it('should expose async', function() {
+    var transport = mandrillTransport();
+    expect(transport.async).to.equal(false);
+  });
+
   describe('#send', function(done) {
     var transport = mandrillTransport();
     var client = transport.mandrillClient;
