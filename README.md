@@ -32,3 +32,43 @@ transport.sendMail({
   }
 });
 ```
+
+## Documentation
+
+### `mandrillTransport`
+
+```javascript
+mandrillTransport(options);
+```
+
+#### Available options
+
++ `async`
++ `tags`
++ `metadata`
++ `recipient_metadata`
++ `preserve_recipients`
+
+### `sendMail`
+
+```javascript
+transport.sendMail(options, function(err, info) {});
+```
+
+#### Available options
+
++ `to`
++ `cc`
++ `bcc`
++ `from`
++ `subject`
++ `headers`
++ `text`
++ `html`
++ `tags`
++ `metadata`
++ `recipient_metadata`
++ `preserve_recipients`
++ `async`
+
+
