@@ -21,6 +21,8 @@ describe('MandrillTransport', function() {
     var payload = {
       data: {
         to: 'SpongeBob SquarePants <spongebob@bikini.bottom>, Patrick Star <patrick@bikini.bottom>',
+        cc: 'Somefool Gettingcopied <somefool@example.com>, Also Copied <alsocopied@example.com>',
+        bcc: 'silentcopy@example.com, alsosilent@example.com',
         from: 'Gary the Snail <gary@bikini.bottom>',
         subject: 'Meow...',
         text: 'Meow!',
@@ -32,11 +34,21 @@ describe('MandrillTransport', function() {
     var stub = sinon.stub(client.messages, 'send', function(data, resolve) {
       var message = data.message;
       expect(message).to.exist;
-      expect(message.to.length).to.equal(2);
+      expect(message.to.length).to.equal(6);
       expect(message.to[0].name).to.equal('SpongeBob SquarePants');
       expect(message.to[0].email).to.equal('spongebob@bikini.bottom');
       expect(message.to[1].name).to.equal('Patrick Star');
       expect(message.to[1].email).to.equal('patrick@bikini.bottom');
+      expect(message.to[2].name).to.equal('Somefool Gettingcopied');
+      expect(message.to[2].email).to.equal('somefool@example.com');
+      expect(message.to[2].type).to.equal('cc');
+      expect(message.to[3].name).to.equal('Also Copied');
+      expect(message.to[3].email).to.equal('alsocopied@example.com');
+      expect(message.to[3].type).to.equal('cc');
+      expect(message.to[4].email).to.equal('silentcopy@example.com');
+      expect(message.to[4].type).to.equal('bcc');
+      expect(message.to[5].email).to.equal('alsosilent@example.com');
+      expect(message.to[5].type).to.equal('bcc');
       expect(message.from_name).to.equal('Gary the Snail');
       expect(message.from_email).to.equal('gary@bikini.bottom');
       expect(message.subject).to.equal('Meow...');
