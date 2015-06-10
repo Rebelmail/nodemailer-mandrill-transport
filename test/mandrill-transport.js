@@ -62,35 +62,46 @@ describe('MandrillTransport', function() {
     expect(transport.preserve_recipients).to.deep.equal(false);
   });
 
-  //describe('overriding #send settings', function(done) {
-  //  it('sets from init', function(done) {
-  //    var transport = mandrillTransport({
-  //      async: true,
-  //      tags: [ 'password-resets' ],
-  //      metadata: { website: 'www.example.com' },
-  //      recipient_metadata: [
-  //        {
-  //          rcpt: 'recipient.email@example.com',
-  //          values: {
-  //            user_id: 123456
-  //          }
-  //        }
-  //      ],
-  //      preserve_recipients: true
-  //    });
-  //    var client = transport.mandrillClient;
+  it('can override settings via message payload', function(done) {
+    var transport = mandrillTransport({
+      async: true,
+      tags: [ 'password-resets' ],
+      metadata: { website: 'www.example.com' },
+      recipient_metadata: [
+        {
+          rcpt: 'recipient.email@example.com',
+          values: {
+            user_id: 123456
+          }
+        }
+      ],
+      preserve_recipients: true
+    });
+    var client = transport.mandrillClient;
+    var stub = sinon.stub(client.messages, 'send', function(data, resolve) {
+      expect(data.async).to.equal(false);
 
-  //    var stub = sinon.stub(client.messages, 'send', function(data, resolve) {
-  //      expect(data.async).to.equal(true);
-  //    });
+      var message = data.message;
+      expect(message.tags).to.deep.equal(['other']);
+      expect(message.metadata).to.deep.equal({website: 'youtube.com'});
+      expect(message.recipient_metadata).to.deep.equal([{rcpt: 'other'}]);
+      expect(message.preserve_recipients).to.equal(false);
 
-  //    var payload = {};
-  //    transport.send(payload, function(err, info) {
-  //      done();
-  //    });
-  //  });
+      resolve([{ _id: 'fake-id', status: 'sent' }]);
+    });
 
-  //});
+    var payload = {
+      data: {
+        async: false,
+        tags: ['other'],
+        metadata: { website: 'youtube.com' },
+        recipient_metadata: [ { rcpt: 'other' } ],
+        preserve_recipients: false
+      }
+    };
+
+    transport.send(payload, done);
+  });
 
   describe('#send', function(done) {
     var transport = mandrillTransport();
