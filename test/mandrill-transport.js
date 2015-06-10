@@ -24,6 +24,74 @@ describe('MandrillTransport', function() {
     expect(transport.async).to.equal(false);
   });
 
+  it('should expose metadata', function() {
+    var transport = mandrillTransport();
+    expect(transport.metadata).to.be.an.object;
+    expect(transport.recipient_metadata).to.be.an.array;
+  });
+
+  it('can set options', function() {
+    var transport = mandrillTransport({
+      async: true,
+      tags: [ 'password-resets' ],
+      metadata: { website: 'www.example.com' },
+      recipient_metadata: [
+        {
+          rcpt: 'recipient.email@example.com',
+          values: {
+            user_id: 123456
+          }
+        }
+      ],
+      preserve_recipients: false
+    });
+
+    expect(transport.async).to.equal(true);
+    expect(transport.tags).to.deep.equal(['password-resets']);
+    expect(transport.metadata).to.deep.equal({ website: 'www.example.com' });
+    expect(transport.recipient_metadata).to.deep.equal(
+      [
+        {
+          rcpt: 'recipient.email@example.com',
+          values: {
+            user_id: 123456
+          }
+        }
+      ]
+    )
+    expect(transport.preserve_recipients).to.deep.equal(false);
+  });
+
+  //describe('overriding #send settings', function(done) {
+  //  it('sets from init', function(done) {
+  //    var transport = mandrillTransport({
+  //      async: true,
+  //      tags: [ 'password-resets' ],
+  //      metadata: { website: 'www.example.com' },
+  //      recipient_metadata: [
+  //        {
+  //          rcpt: 'recipient.email@example.com',
+  //          values: {
+  //            user_id: 123456
+  //          }
+  //        }
+  //      ],
+  //      preserve_recipients: true
+  //    });
+  //    var client = transport.mandrillClient;
+
+  //    var stub = sinon.stub(client.messages, 'send', function(data, resolve) {
+  //      expect(data.async).to.equal(true);
+  //    });
+
+  //    var payload = {};
+  //    transport.send(payload, function(err, info) {
+  //      done();
+  //    });
+  //  });
+
+  //});
+
   describe('#send', function(done) {
     var transport = mandrillTransport();
     var client = transport.mandrillClient;
@@ -42,6 +110,8 @@ describe('MandrillTransport', function() {
 
     var status;
     var stub = sinon.stub(client.messages, 'send', function(data, resolve) {
+      expect(data.async).to.equal(false);
+
       var message = data.message;
       expect(message).to.exist;
       expect(message.to.length).to.equal(6);
@@ -64,6 +134,12 @@ describe('MandrillTransport', function() {
       expect(message.subject).to.equal('Meow...');
       expect(message.text).to.equal('Meow!');
       expect(message.html).to.equal('<p>Meow!</p>');
+
+      expect(message.tags).to.be.an.array;
+      expect(message.metadata).to.be.an.array;
+      expect(message.recipient_metadata).to.be.an.array;
+      expect(message.preserve_recipients).to.equal(true);
+
       resolve([{ _id: 'fake-id', status: status }]);
     });
 
