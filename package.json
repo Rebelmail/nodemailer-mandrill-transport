@@ -22,7 +22,8 @@
   "homepage": "https://github.com/RebelMail/nodemailer-mandrill-transport",
   "dependencies": {
     "email-addresses": "^2.0.1",
-    "mandrill-api": "^1.0.41"
+    "mandrill-api": "^1.0.41",
+    "underscore": "^1.8.3"
   },
   "devDependencies": {
     "chai": "^2.2.0",

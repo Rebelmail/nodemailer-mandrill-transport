@@ -65,10 +65,7 @@ transport.sendMail(options, function(err, info) {});
 + `headers`
 + `text`
 + `html`
-+ `tags`
-+ `metadata`
-+ `recipient_metadata`
-+ `preserve_recipients`
 + `async`
++ `...all other mandrill options```
 
 
