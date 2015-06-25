@@ -21,6 +21,7 @@ var transport = nodemailer.createTransport(mandrillTransport({
 }));
 
 transport.sendMail({
+  from: 'sender@example.com',
   to: 'user@example.com',
   subject: 'Hello',
   html: '<p>How are you?</p>'
