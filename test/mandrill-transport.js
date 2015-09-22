@@ -297,7 +297,7 @@ describe('MandrillTransport', function() {
 
     it('sent response', function(done) {
       status = 'sent';
-      transport.sendTemplate(payload, function(err, info) {
+      transport.send(payload, function(err, info) {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(1);
@@ -309,7 +309,7 @@ describe('MandrillTransport', function() {
 
     it('queued response', function(done) {
       status = 'queued';
-      transport.sendTemplate(payload, function(err, info) {
+      transport.send(payload, function(err, info) {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(1);
@@ -321,7 +321,7 @@ describe('MandrillTransport', function() {
 
     it('scheduled response', function(done) {
       status = 'scheduled';
-      transport.sendTemplate(payload, function(err, info) {
+      transport.send(payload, function(err, info) {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(1);
@@ -333,7 +333,7 @@ describe('MandrillTransport', function() {
 
     it('invalid response', function(done) {
       status = 'invalid';
-      transport.sendTemplate(payload, function(err, info) {
+      transport.send(payload, function(err, info) {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(0);
@@ -344,7 +344,7 @@ describe('MandrillTransport', function() {
 
     it('rejected response', function(done) {
       status = 'rejected';
-      transport.sendTemplate(payload, function(err, info) {
+      transport.send(payload, function(err, info) {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(0);
