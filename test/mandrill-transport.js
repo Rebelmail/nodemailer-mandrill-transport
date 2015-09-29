@@ -14,72 +14,122 @@ describe('MandrillTransport', function() {
     expect(transport.version).to.equal(packageData.version);
   });
 
-  it('should expose preserve_recipients', function() {
-    var transport = mandrillTransport();
-    expect(transport.preserve_recipients).to.equal(true);
-  });
-
-  it('should expose async', function() {
-    var transport = mandrillTransport();
-    expect(transport.async).to.equal(false);
-  });
-
-  it('should expose metadata', function() {
-    var transport = mandrillTransport();
-    expect(transport.metadata).to.be.an.object;
-    expect(transport.recipient_metadata).to.be.an.array;
-  });
-
-  it('can set options', function() {
+  it('can set defaults options', function() {
     var transport = mandrillTransport({
       async: true,
-      tags: [ 'password-resets' ],
-      metadata: { website: 'www.example.com' },
-      recipient_metadata: [
-        {
-          rcpt: 'recipient.email@example.com',
-          values: {
-            user_id: 123456
-          }
-        }
-      ],
-      preserve_recipients: false
+      message: {
+        important:true,
+        track_opens: true,
+        track_clicks: true,
+        auto_text: false,
+        auto_html: true,
+        inline_css: true,
+        url_strip_qs: true,
+        preserve_recipients: false,
+        view_content_link: true,
+        merge: true
+      }
     });
+    var options = transport.options;
+    expect(options.async).to.equal(true);
+    var message = options.message;
+    expect(message.track_opens).to.equal(true);
+    expect(message.track_clicks).to.equal(true);
+    expect(message.auto_text).to.equal(false);
+    expect(message.auto_html).to.equal(true);
+    expect(message.inline_css).to.equal(true);
+    expect(message.url_strip_qs).to.equal(true);
+    expect(message.preserve_recipients).to.equal(false);
+    expect(message.view_content_link).to.equal(true);
+    expect(message.merge).to.equal(true);
+  });
+  
 
-    expect(transport.async).to.equal(true);
-    expect(transport.tags).to.deep.equal(['password-resets']);
-    expect(transport.metadata).to.deep.equal({ website: 'www.example.com' });
-    expect(transport.recipient_metadata).to.deep.equal(
-      [
-        {
-          rcpt: 'recipient.email@example.com',
-          values: {
-            user_id: 123456
-          }
+  describe('prototype.useDefault', function() {
+    it('override defaults options', function() {
+      var transport = mandrillTransport({
+        async: false,
+        message: {
+          important: false,
+          track_opens: false,
+          track_clicks: false,
+          auto_text: false,
+          auto_html: false,
+          inline_css: false,
+          url_strip_qs: false,
+          preserve_recipients: false,
+          view_content_link: false,
+          merge: false
         }
-      ]
-    )
-    expect(transport.preserve_recipients).to.deep.equal(false);
+      });
+
+      var options =  {
+        async: true,
+        message: {
+          important: true,
+          track_opens: true,
+          track_clicks: true,
+          auto_text: true,
+          auto_html: true,
+          inline_css: true,
+          url_strip_qs: true,
+          preserve_recipients: true,
+          view_content_link: true,
+          merge: true
+        }
+      };
+      var params = transport.useDefaults(options);
+      expect(params.async).to.equal(true);
+      var message = params.message;
+      expect(message.track_opens).to.equal(true);
+      expect(message.track_clicks).to.equal(true);
+      expect(message.auto_text).to.equal(true);
+      expect(message.auto_html).to.equal(true);
+      expect(message.inline_css).to.equal(true);
+      expect(message.url_strip_qs).to.equal(true);
+      expect(message.preserve_recipients).to.equal(true);
+      expect(message.view_content_link).to.equal(true);
+      expect(message.merge).to.equal(true);
+    });
   });
 
   it('can override settings via message payload', function(done) {
     var transport = mandrillTransport({
-      async: true,
-      tags: [ 'password-resets' ],
-      metadata: { website: 'www.example.com' },
-      recipient_metadata: [
-        {
-          rcpt: 'recipient.email@example.com',
-          values: {
-            user_id: 123456
-          }
-        }
-      ],
-      preserve_recipients: true
+      async: false,
+      message: {
+        important: false
+      }
     });
     var client = transport.mandrillClient;
     var stub = sinon.stub(client.messages, 'send', function(data, resolve) {
-      expect(data.async).to.equal(false);
+      expect(data.async).to.equal(true);
+
+      var message = data.message;
+      expect(message.important).to.equal(true);
+
+      resolve([{ _id: 'fake-id', status: 'sent' }]);
+    });
+
+    var payload = {
+      async: true,
+      message: {
+        important: true
+      }
+    };
+
+    transport.send(payload, done);
+  });
+
+  it('can add other settings via message payload', function(done) {
+    var transport = mandrillTransport({
+      async: false,
+      message: {
+        important: false
+      }
+    });
+    var client = transport.mandrillClient;
+    var stub = sinon.stub(client.messages, 'send', function(data, resolve) {
+      expect(data.async).to.equal(true);
 
       var message = data.message;
       expect(message.tags).to.deep.equal(['other']);
@@ -91,8 +141,9 @@ describe('MandrillTransport', function() {
     });
 
     var payload = {
-      data: {
-        async: false,
+      async: true,
+      message: {
+        important: true,
         tags: ['other'],
         metadata: { website: 'youtube.com' },
         recipient_metadata: [ { rcpt: 'other' } ],
@@ -104,15 +155,18 @@ describe('MandrillTransport', function() {
   });
 
   describe('#send', function(done) {
-    var transport = mandrillTransport();
+    var transport = mandrillTransport({options: {message: {important: true}}});
     var client = transport.mandrillClient;
 
     var payload = {
-      data: {
-        to: 'SpongeBob SquarePants <spongebob@bikini.bottom>, Patrick Star <patrick@bikini.bottom>',
-        cc: 'Somefool Gettingcopied <somefool@example.com>, Also Copied <alsocopied@example.com>',
-        bcc: 'silentcopy@example.com, alsosilent@example.com',
-        from: 'Gary the Snail <gary@bikini.bottom>',
+      message: {
+        to: [{name: 'SpongeBob SquarePants', email: 'spongebob@bikini.bottom'},
+          {name: 'Patrick Star', email: 'patrick@bikini.bottom'},
+          {name: 'Somefool Gettingcopied', email: 'somefool@example.com', type: 'cc'},
+          {name: 'Also Copied', email: 'alsocopied@example.com', type: 'cc'},
+          {email: 'silentcopy@example.com', type: 'bcc'}, {email: 'alsosilent@example.com', type: 'bcc'}],
+        from_email: 'gary@bikini.bottom',
+        from_name: 'Gary the Snail',
         subject: 'Meow...',
         text: 'Meow!',
         html: '<p>Meow!</p>'
@@ -120,10 +174,10 @@ describe('MandrillTransport', function() {
     };
 
     var status;
-    var stub = sinon.stub(client.messages, 'send', function(data, resolve) {
-      expect(data.async).to.equal(false);
+    var stub = sinon.stub(client.messages, 'send', function(payload, resolve) {
+      expect(payload.async).to.equal(false);
 
-      var message = data.message;
+      var message = payload.message;
       expect(message).to.exist;
       expect(message.to.length).to.equal(6);
       expect(message.to[0].name).to.equal('SpongeBob SquarePants');
@@ -145,11 +199,6 @@ describe('MandrillTransport', function() {
       expect(message.subject).to.equal('Meow...');
       expect(message.text).to.equal('Meow!');
       expect(message.html).to.equal('<p>Meow!</p>');
-
-      expect(message.tags).to.be.an.array;
-      expect(message.metadata).to.be.an.array;
-      expect(message.recipient_metadata).to.be.an.array;
-      expect(message.preserve_recipients).to.equal(true);
 
       resolve([{ _id: 'fake-id', status: status }]);
     });
@@ -231,11 +280,14 @@ describe('MandrillTransport', function() {
           "name": "Michael Knight",
           "content": "The knight Rider content"
       }],
-      data: {
-        to: 'SpongeBob SquarePants <spongebob@bikini.bottom>, Patrick Star <patrick@bikini.bottom>',
-        cc: 'Somefool Gettingcopied <somefool@example.com>, Also Copied <alsocopied@example.com>',
-        bcc: 'silentcopy@example.com, alsosilent@example.com',
-        from: 'Gary the Snail <gary@bikini.bottom>',
+      message: {
+        to: [{name: 'SpongeBob SquarePants', email: 'spongebob@bikini.bottom'},
+          {name: 'Patrick Star', email: 'patrick@bikini.bottom'},
+          {name: 'Somefool Gettingcopied', email: 'somefool@example.com', type: 'cc'},
+          {name: 'Also Copied', email: 'alsocopied@example.com', type: 'cc'},
+          {email: 'silentcopy@example.com', type: 'bcc'}, {email: 'alsosilent@example.com', type: 'bcc'}],
+        from_email: 'gary@bikini.bottom',
+        from_name: 'Gary the Snail',
         subject: 'Meow...',
         text: 'Meow!',
         html: '<p>Meow!</p>'
@@ -278,11 +330,6 @@ describe('MandrillTransport', function() {
       expect(message.subject).to.equal('Meow...');
       expect(message.text).to.equal('Meow!');
       expect(message.html).to.equal('<p>Meow!</p>');
-
-      expect(message.tags).to.be.an.array;
-      expect(message.metadata).to.be.an.array;
-      expect(message.recipient_metadata).to.be.an.array;
-      expect(message.preserve_recipients).to.equal(true);
 
       resolve([{ _id: 'fake-id', status: status }]);
     });
