@@ -2,6 +2,7 @@
 
 var sinon = require('sinon');
 var expect = require('chai').expect;
+var _ = require('underscore');
 
 var mandrillTransport = require('../');
 
@@ -154,31 +155,38 @@ describe('MandrillTransport', function() {
     transport.send(payload, done);
   });
 
-  describe('#send', function(done) {
-    var transport = mandrillTransport({options: {message: {important: true}}});
+  describe('#send', function() {
+    var transport = mandrillTransport();
     var client = transport.mandrillClient;
 
-    var payload = {
-      message: {
-        to: [{name: 'SpongeBob SquarePants', email: 'spongebob@bikini.bottom'},
-          {name: 'Patrick Star', email: 'patrick@bikini.bottom'},
-          {name: 'Somefool Gettingcopied', email: 'somefool@example.com', type: 'cc'},
-          {name: 'Also Copied', email: 'alsocopied@example.com', type: 'cc'},
-          {email: 'silentcopy@example.com', type: 'bcc'}, {email: 'alsosilent@example.com', type: 'bcc'}],
-        from_email: 'gary@bikini.bottom',
-        from_name: 'Gary the Snail',
-        subject: 'Meow...',
-        text: 'Meow!',
-        html: '<p>Meow!</p>'
-      }
+    var data = {
+      to: [{name: 'SpongeBob SquarePants', email: 'spongebob@bikini.bottom'},
+        {name: 'Patrick Star', email: 'patrick@bikini.bottom'},
+        {name: 'Somefool Gettingcopied', email: 'somefool@example.com', type: 'cc'},
+        {name: 'Also Copied', email: 'alsocopied@example.com', type: 'cc'},
+        {email: 'silentcopy@example.com', type: 'bcc'}, {email: 'alsosilent@example.com', type: 'bcc'}],
+      from: {email: 'gary@bikini.bottom', name: 'Gary the Snail'},
+      subject: 'Meow...',
+      text: 'Meow!',
+      html: '<p>Meow!</p>'
+    };
+
+    var dataNotFormatted = {
+      to: 'SpongeBob SquarePants <spongebob@bikini.bottom>, Patrick Star <patrick@bikini.bottom>',
+        cc: 'Somefool Gettingcopied <somefool@example.com>, Also Copied <alsocopied@example.com>',
+      bcc: 'silentcopy@example.com, alsosilent@example.com',
+      from: 'Gary the Snail <gary@bikini.bottom>',
+      subject: 'Meow...',
+      text: 'Meow!',
+      html: '<p>Meow!</p>'
     };
 
     var status;
-    var stub = sinon.stub(client.messages, 'send', function(payload, resolve) {
-      expect(payload.async).to.equal(false);
+    var stub = sinon.stub(client.messages, 'send', function(data, resolve) {
+      expect(data).to.exist;
+      expect(data.async).to.equal(false);
 
-      var message = payload.message;
-      expect(message).to.exist;
+      var message = data.message;
       expect(message.to.length).to.equal(6);
       expect(message.to[0].name).to.equal('SpongeBob SquarePants');
       expect(message.to[0].email).to.equal('spongebob@bikini.bottom');
@@ -213,7 +221,7 @@ describe('MandrillTransport', function() {
 
     it('sent response', function(done) {
       status = 'sent';
-      transport.send(payload, function(err, info) {
+      transport.send(_.clone(data), function(err, info) {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(1);
@@ -225,7 +233,7 @@ describe('MandrillTransport', function() {
 
     it('queued response', function(done) {
       status = 'queued';
-      transport.send(payload, function(err, info) {
+      transport.send(_.clone(data), function(err, info) {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(1);
@@ -237,7 +245,7 @@ describe('MandrillTransport', function() {
 
     it('scheduled response', function(done) {
       status = 'scheduled';
-      transport.send(payload, function(err, info) {
+      transport.send(_.clone(data), function(err, info) {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(1);
@@ -249,7 +257,7 @@ describe('MandrillTransport', function() {
 
     it('invalid response', function(done) {
       status = 'invalid';
-      transport.send(payload, function(err, info) {
+      transport.send(_.clone(data), function(err, info) {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(0);
@@ -260,12 +268,73 @@ describe('MandrillTransport', function() {
 
     it('rejected response', function(done) {
       status = 'rejected';
-      transport.send(payload, function(err, info) {
+      transport.send(_.clone(data), function(err, info) {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(0);
         expect(info.rejected.length).to.equal(1);
         done();
+      });
+    });
+
+    describe('with data not formatted', function() {
+
+      it('sent response', function (done) {
+        status = 'sent';
+        transport.send(_.clone(dataNotFormatted), function (err, info) {
+          expect(err).to.not.exist;
+          expect(stub.calledOnce).to.be.true;
+          expect(info.accepted.length).to.equal(1);
+          expect(info.rejected.length).to.equal(0);
+          expect(info.messageId).to.equal('fake-id');
+          done();
+        });
+      });
+
+      it('queued response', function(done) {
+        status = 'queued';
+        transport.send(_.clone(dataNotFormatted), function(err, info) {
+          expect(err).to.not.exist;
+          expect(stub.calledOnce).to.be.true;
+          expect(info.accepted.length).to.equal(1);
+          expect(info.rejected.length).to.equal(0);
+          expect(info.messageId).to.equal('fake-id');
+          done();
+        });
+      });
+
+      it('scheduled response', function(done) {
+        status = 'scheduled';
+        transport.send(_.clone(dataNotFormatted), function(err, info) {
+          expect(err).to.not.exist;
+          expect(stub.calledOnce).to.be.true;
+          expect(info.accepted.length).to.equal(1);
+          expect(info.rejected.length).to.equal(0);
+          expect(info.messageId).to.equal('fake-id');
+          done();
+        });
+      });
+
+      it('invalid response', function(done) {
+        status = 'invalid';
+        transport.send(_.clone(dataNotFormatted), function(err, info) {
+          expect(err).to.not.exist;
+          expect(stub.calledOnce).to.be.true;
+          expect(info.accepted.length).to.equal(0);
+          expect(info.rejected.length).to.equal(1);
+          done();
+        });
+      });
+
+      it('rejected response', function(done) {
+        status = 'rejected';
+        transport.send(_.clone(dataNotFormatted), function(err, info) {
+          expect(err).to.not.exist;
+          expect(stub.calledOnce).to.be.true;
+          expect(info.accepted.length).to.equal(0);
+          expect(info.rejected.length).to.equal(1);
+          done();
+        });
       });
     });
   });
@@ -274,24 +343,36 @@ describe('MandrillTransport', function() {
     var transport = mandrillTransport();
     var client = transport.mandrillClient;
 
-    var payload = {
+    var data = {
       template_name: 'a_template_name',
       template_content: [{
           "name": "Michael Knight",
           "content": "The knight Rider content"
       }],
-      message: {
-        to: [{name: 'SpongeBob SquarePants', email: 'spongebob@bikini.bottom'},
-          {name: 'Patrick Star', email: 'patrick@bikini.bottom'},
-          {name: 'Somefool Gettingcopied', email: 'somefool@example.com', type: 'cc'},
-          {name: 'Also Copied', email: 'alsocopied@example.com', type: 'cc'},
-          {email: 'silentcopy@example.com', type: 'bcc'}, {email: 'alsosilent@example.com', type: 'bcc'}],
-        from_email: 'gary@bikini.bottom',
-        from_name: 'Gary the Snail',
-        subject: 'Meow...',
-        text: 'Meow!',
-        html: '<p>Meow!</p>'
-      }
+      to: [{name: 'SpongeBob SquarePants', email: 'spongebob@bikini.bottom'},
+        {name: 'Patrick Star', email: 'patrick@bikini.bottom'},
+        {name: 'Somefool Gettingcopied', email: 'somefool@example.com', type: 'cc'},
+        {name: 'Also Copied', email: 'alsocopied@example.com', type: 'cc'},
+        {email: 'silentcopy@example.com', type: 'bcc'}, {email: 'alsosilent@example.com', type: 'bcc'}],
+      from: {email: 'gary@bikini.bottom', name: 'Gary the Snail'},
+      subject: 'Meow...',
+      text: 'Meow!',
+      html: '<p>Meow!</p>'
+    };
+
+    var dataNotFormatted = {
+      template_name: 'a_template_name',
+      template_content: [{
+        "name": "Michael Knight",
+        "content": "The knight Rider content"
+      }],
+      to: 'SpongeBob SquarePants <spongebob@bikini.bottom>, Patrick Star <patrick@bikini.bottom>',
+      cc: 'Somefool Gettingcopied <somefool@example.com>, Also Copied <alsocopied@example.com>',
+      bcc: 'silentcopy@example.com, alsosilent@example.com',
+      from: 'Gary the Snail <gary@bikini.bottom>',
+      subject: 'Meow...',
+      text: 'Meow!',
+      html: '<p>Meow!</p>'
     };
 
     var status;
@@ -344,7 +425,7 @@ describe('MandrillTransport', function() {
 
     it('sent response', function(done) {
       status = 'sent';
-      transport.send(payload, function(err, info) {
+      transport.send(_.clone(data), function(err, info) {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(1);
@@ -356,7 +437,7 @@ describe('MandrillTransport', function() {
 
     it('queued response', function(done) {
       status = 'queued';
-      transport.send(payload, function(err, info) {
+      transport.send(_.clone(data), function(err, info) {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(1);
@@ -368,7 +449,7 @@ describe('MandrillTransport', function() {
 
     it('scheduled response', function(done) {
       status = 'scheduled';
-      transport.send(payload, function(err, info) {
+      transport.send(_.clone(data), function(err, info) {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(1);
@@ -380,7 +461,7 @@ describe('MandrillTransport', function() {
 
     it('invalid response', function(done) {
       status = 'invalid';
-      transport.send(payload, function(err, info) {
+      transport.send(_.clone(data), function(err, info) {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(0);
@@ -391,12 +472,73 @@ describe('MandrillTransport', function() {
 
     it('rejected response', function(done) {
       status = 'rejected';
-      transport.send(payload, function(err, info) {
+      transport.send(_.clone(data), function(err, info) {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(0);
         expect(info.rejected.length).to.equal(1);
         done();
+      });
+    });
+
+    describe('with data not formatted', function() {
+
+      it('sent response', function (done) {
+        status = 'sent';
+        transport.send(_.clone(dataNotFormatted), function (err, info) {
+          expect(err).to.not.exist;
+          expect(stub.calledOnce).to.be.true;
+          expect(info.accepted.length).to.equal(1);
+          expect(info.rejected.length).to.equal(0);
+          expect(info.messageId).to.equal('fake-id');
+          done();
+        });
+      });
+
+      it('queued response', function(done) {
+        status = 'queued';
+        transport.send(_.clone(dataNotFormatted), function(err, info) {
+          expect(err).to.not.exist;
+          expect(stub.calledOnce).to.be.true;
+          expect(info.accepted.length).to.equal(1);
+          expect(info.rejected.length).to.equal(0);
+          expect(info.messageId).to.equal('fake-id');
+          done();
+        });
+      });
+
+      it('scheduled response', function(done) {
+        status = 'scheduled';
+        transport.send(_.clone(dataNotFormatted), function(err, info) {
+          expect(err).to.not.exist;
+          expect(stub.calledOnce).to.be.true;
+          expect(info.accepted.length).to.equal(1);
+          expect(info.rejected.length).to.equal(0);
+          expect(info.messageId).to.equal('fake-id');
+          done();
+        });
+      });
+
+      it('invalid response', function(done) {
+        status = 'invalid';
+        transport.send(_.clone(dataNotFormatted), function(err, info) {
+          expect(err).to.not.exist;
+          expect(stub.calledOnce).to.be.true;
+          expect(info.accepted.length).to.equal(0);
+          expect(info.rejected.length).to.equal(1);
+          done();
+        });
+      });
+
+      it('rejected response', function(done) {
+        status = 'rejected';
+        transport.send(_.clone(dataNotFormatted), function(err, info) {
+          expect(err).to.not.exist;
+          expect(stub.calledOnce).to.be.true;
+          expect(info.accepted.length).to.equal(0);
+          expect(info.rejected.length).to.equal(1);
+          done();
+        });
       });
     });
   });
