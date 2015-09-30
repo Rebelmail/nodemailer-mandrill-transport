@@ -112,9 +112,11 @@ describe('MandrillTransport', function() {
     });
 
     var payload = {
-      async: true,
-      message: {
-        important: true
+      data: {
+        async: true,
+        message: {
+          important: true
+        }
       }
     };
 
@@ -142,13 +144,15 @@ describe('MandrillTransport', function() {
     });
 
     var payload = {
-      async: true,
-      message: {
-        important: true,
-        tags: ['other'],
-        metadata: { website: 'youtube.com' },
-        recipient_metadata: [ { rcpt: 'other' } ],
-        preserve_recipients: false
+      data: {
+        async: true,
+        message: {
+          important: true,
+          tags: ['other'],
+          metadata: { website: 'youtube.com' },
+          recipient_metadata: [ { rcpt: 'other' } ],
+          preserve_recipients: false
+        }
       }
     };
 
@@ -173,12 +177,13 @@ describe('MandrillTransport', function() {
 
     var dataNotFormatted = {
       to: 'SpongeBob SquarePants <spongebob@bikini.bottom>, Patrick Star <patrick@bikini.bottom>',
-        cc: 'Somefool Gettingcopied <somefool@example.com>, Also Copied <alsocopied@example.com>',
+      cc: 'Somefool Gettingcopied <somefool@example.com>, Also Copied <alsocopied@example.com>',
       bcc: 'silentcopy@example.com, alsosilent@example.com',
       from: 'Gary the Snail <gary@bikini.bottom>',
       subject: 'Meow...',
       text: 'Meow!',
       html: '<p>Meow!</p>'
+
     };
 
     var status;
@@ -221,7 +226,7 @@ describe('MandrillTransport', function() {
 
     it('sent response', function(done) {
       status = 'sent';
-      transport.send(_.clone(data), function(err, info) {
+      transport.send({data: _.clone(data)}, function(err, info) {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(1);
@@ -233,7 +238,7 @@ describe('MandrillTransport', function() {
 
     it('queued response', function(done) {
       status = 'queued';
-      transport.send(_.clone(data), function(err, info) {
+      transport.send({data: _.clone(data)}, function(err, info) {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(1);
@@ -245,7 +250,7 @@ describe('MandrillTransport', function() {
 
     it('scheduled response', function(done) {
       status = 'scheduled';
-      transport.send(_.clone(data), function(err, info) {
+      transport.send({data: _.clone(data)}, function(err, info) {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(1);
@@ -257,7 +262,7 @@ describe('MandrillTransport', function() {
 
     it('invalid response', function(done) {
       status = 'invalid';
-      transport.send(_.clone(data), function(err, info) {
+      transport.send({data: _.clone(data)}, function(err, info) {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(0);
@@ -268,7 +273,7 @@ describe('MandrillTransport', function() {
 
     it('rejected response', function(done) {
       status = 'rejected';
-      transport.send(_.clone(data), function(err, info) {
+      transport.send({data: _.clone(data)}, function(err, info) {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(0);
@@ -281,7 +286,7 @@ describe('MandrillTransport', function() {
 
       it('sent response', function (done) {
         status = 'sent';
-        transport.send(_.clone(dataNotFormatted), function (err, info) {
+        transport.send({data: _.clone(dataNotFormatted)}, function (err, info) {
           expect(err).to.not.exist;
           expect(stub.calledOnce).to.be.true;
           expect(info.accepted.length).to.equal(1);
@@ -293,7 +298,7 @@ describe('MandrillTransport', function() {
 
       it('queued response', function(done) {
         status = 'queued';
-        transport.send(_.clone(dataNotFormatted), function(err, info) {
+        transport.send({data: _.clone(dataNotFormatted)}, function(err, info) {
           expect(err).to.not.exist;
           expect(stub.calledOnce).to.be.true;
           expect(info.accepted.length).to.equal(1);
@@ -305,7 +310,7 @@ describe('MandrillTransport', function() {
 
       it('scheduled response', function(done) {
         status = 'scheduled';
-        transport.send(_.clone(dataNotFormatted), function(err, info) {
+        transport.send({data: _.clone(dataNotFormatted)}, function(err, info) {
           expect(err).to.not.exist;
           expect(stub.calledOnce).to.be.true;
           expect(info.accepted.length).to.equal(1);
@@ -317,7 +322,7 @@ describe('MandrillTransport', function() {
 
       it('invalid response', function(done) {
         status = 'invalid';
-        transport.send(_.clone(dataNotFormatted), function(err, info) {
+        transport.send({data: _.clone(dataNotFormatted)}, function(err, info) {
           expect(err).to.not.exist;
           expect(stub.calledOnce).to.be.true;
           expect(info.accepted.length).to.equal(0);
@@ -328,7 +333,7 @@ describe('MandrillTransport', function() {
 
       it('rejected response', function(done) {
         status = 'rejected';
-        transport.send(_.clone(dataNotFormatted), function(err, info) {
+        transport.send({data: _.clone(dataNotFormatted)}, function(err, info) {
           expect(err).to.not.exist;
           expect(stub.calledOnce).to.be.true;
           expect(info.accepted.length).to.equal(0);
@@ -339,15 +344,15 @@ describe('MandrillTransport', function() {
     });
   });
 
-  describe('#sendTemplate', function(done) {
+  describe('#sendTemplate', function() {
     var transport = mandrillTransport();
     var client = transport.mandrillClient;
 
     var data = {
       template_name: 'a_template_name',
       template_content: [{
-          "name": "Michael Knight",
-          "content": "The knight Rider content"
+        "name": "Michael Knight",
+        "content": "The knight Rider content"
       }],
       to: [{name: 'SpongeBob SquarePants', email: 'spongebob@bikini.bottom'},
         {name: 'Patrick Star', email: 'patrick@bikini.bottom'},
@@ -425,7 +430,7 @@ describe('MandrillTransport', function() {
 
     it('sent response', function(done) {
       status = 'sent';
-      transport.send(_.clone(data), function(err, info) {
+      transport.send({data: _.clone(data)}, function(err, info) {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(1);
@@ -437,7 +442,7 @@ describe('MandrillTransport', function() {
 
     it('queued response', function(done) {
       status = 'queued';
-      transport.send(_.clone(data), function(err, info) {
+      transport.send({data: _.clone(data)}, function(err, info) {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(1);
@@ -449,7 +454,7 @@ describe('MandrillTransport', function() {
 
     it('scheduled response', function(done) {
       status = 'scheduled';
-      transport.send(_.clone(data), function(err, info) {
+      transport.send({data: _.clone(data)}, function(err, info) {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(1);
@@ -461,7 +466,7 @@ describe('MandrillTransport', function() {
 
     it('invalid response', function(done) {
       status = 'invalid';
-      transport.send(_.clone(data), function(err, info) {
+      transport.send({data: _.clone(data)}, function(err, info) {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(0);
@@ -472,7 +477,7 @@ describe('MandrillTransport', function() {
 
     it('rejected response', function(done) {
       status = 'rejected';
-      transport.send(_.clone(data), function(err, info) {
+      transport.send({data: _.clone(data)}, function(err, info) {
         expect(err).to.not.exist;
         expect(stub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(0);
@@ -485,7 +490,7 @@ describe('MandrillTransport', function() {
 
       it('sent response', function (done) {
         status = 'sent';
-        transport.send(_.clone(dataNotFormatted), function (err, info) {
+        transport.send({data: _.clone(dataNotFormatted)}, function (err, info) {
           expect(err).to.not.exist;
           expect(stub.calledOnce).to.be.true;
           expect(info.accepted.length).to.equal(1);
@@ -497,7 +502,7 @@ describe('MandrillTransport', function() {
 
       it('queued response', function(done) {
         status = 'queued';
-        transport.send(_.clone(dataNotFormatted), function(err, info) {
+        transport.send({data: _.clone(dataNotFormatted)}, function(err, info) {
           expect(err).to.not.exist;
           expect(stub.calledOnce).to.be.true;
           expect(info.accepted.length).to.equal(1);
@@ -509,7 +514,7 @@ describe('MandrillTransport', function() {
 
       it('scheduled response', function(done) {
         status = 'scheduled';
-        transport.send(_.clone(dataNotFormatted), function(err, info) {
+        transport.send({data: _.clone(dataNotFormatted)}, function(err, info) {
           expect(err).to.not.exist;
           expect(stub.calledOnce).to.be.true;
           expect(info.accepted.length).to.equal(1);
@@ -521,7 +526,7 @@ describe('MandrillTransport', function() {
 
       it('invalid response', function(done) {
         status = 'invalid';
-        transport.send(_.clone(dataNotFormatted), function(err, info) {
+        transport.send({data: _.clone(dataNotFormatted)}, function(err, info) {
           expect(err).to.not.exist;
           expect(stub.calledOnce).to.be.true;
           expect(info.accepted.length).to.equal(0);
@@ -532,7 +537,7 @@ describe('MandrillTransport', function() {
 
       it('rejected response', function(done) {
         status = 'rejected';
-        transport.send(_.clone(dataNotFormatted), function(err, info) {
+        transport.send({data: _.clone(dataNotFormatted)}, function(err, info) {
           expect(err).to.not.exist;
           expect(stub.calledOnce).to.be.true;
           expect(info.accepted.length).to.equal(0);
