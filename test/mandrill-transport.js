@@ -176,7 +176,8 @@ describe('MandrillTransport', function() {
     };
 
     var dataNotFormatted = {
-      to: 'SpongeBob SquarePants <spongebob@bikini.bottom>, Patrick Star <patrick@bikini.bottom>',
+      to: [{name: 'SpongeBob SquarePants', email: 'spongebob@bikini.bottom'},
+        {name: 'Patrick Star', email: 'patrick@bikini.bottom'}],
       cc: 'Somefool Gettingcopied <somefool@example.com>, Also Copied <alsocopied@example.com>',
       bcc: 'silentcopy@example.com, alsosilent@example.com',
       from: 'Gary the Snail <gary@bikini.bottom>',
@@ -371,7 +372,8 @@ describe('MandrillTransport', function() {
         "name": "Michael Knight",
         "content": "The knight Rider content"
       }],
-      to: 'SpongeBob SquarePants <spongebob@bikini.bottom>, Patrick Star <patrick@bikini.bottom>',
+      to: [{name: 'SpongeBob SquarePants', email: 'spongebob@bikini.bottom'},
+        {name: 'Patrick Star', email: 'patrick@bikini.bottom'}],
       cc: 'Somefool Gettingcopied <somefool@example.com>, Also Copied <alsocopied@example.com>',
       bcc: 'silentcopy@example.com, alsosilent@example.com',
       from: 'Gary the Snail <gary@bikini.bottom>',
