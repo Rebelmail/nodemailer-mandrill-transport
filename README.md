@@ -34,42 +34,17 @@ transport.sendMail({
 });
 ```
 
-## Documentation
+## Using Mandrill API options
 
-### `mandrillTransport`
-
-```javascript
-mandrillTransport(options);
-```
-
-#### Available options
-
-+ `async`
-+ `tags`
-+ `metadata`
-+ `recipient_metadata`
-+ `preserve_recipients`
-
-### `sendMail`
+It is possible to use any Messages Send Mandrill API option by passing it into
+the `mandrillOptions` option. These will be deeply merged over the API call this
+transport builds for you. For example, this transport enables the `async` option
+by default. To disable this,
 
 ```javascript
-transport.sendMail(options, function(err, info) {});
+transport.sendMail({
+  mandrillOptions: {
+    async: false
+  }
+}, /* ... */);
 ```
-
-#### Available options
-
-+ `to`
-+ `cc`
-+ `bcc`
-+ `from`
-+ `subject`
-+ `headers`
-+ `text`
-+ `html`
-+ `tags`
-+ `metadata`
-+ `recipient_metadata`
-+ `preserve_recipients`
-+ `async`
-
-
