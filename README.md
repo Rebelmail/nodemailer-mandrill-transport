@@ -48,3 +48,38 @@ transport.sendMail({
   }
 }, /* ... */);
 ```
+
+## Sending Images to Mandrill
+
+To send images as attachments:
+
+```javascript
+transport.sendMail({
+  mandrillOptions: {
+    images: [
+      "type": "image/png",
+      "name": "IMAGECID",
+      "content": "ZXhhbXBsZSBmaWxl",
+    ],
+  }
+}, /* ... */);
+```
+
+**name**: image cid:
+Reference your attached image in your html like:
+
+```html
+<img src="IMAGECID">
+```
+
+Make sure to use unique cids for your images!
+
+**content**: a base64 representation of your image.
+
+```javascript
+var fs = require('fs');
+var imgBuff = fs.readFileSync('path/to/file');
+
+imgBuff.toString('base64');
+```
+
