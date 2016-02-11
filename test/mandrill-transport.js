@@ -14,6 +14,42 @@ describe('MandrillTransport', function() {
     expect(transport.version).to.equal(packageData.version);
   });
 
+  it('should fail silently when address is not defined', function() {
+    var transport = mandrillTransport();
+    var address = transport.formatAddress('');
+    expect(address).to.be.an('array');
+    expect(address.length).to.equal(0);
+  });
+
+  it('should format email address if an array is provided', function() {
+    var transport = mandrillTransport();
+    var address = transport.formatAddress(['Patrick Star <patrick@bikini.bottom>']);
+    expect(address[0].parts).to.be.an('object');
+    expect(address.length).to.equal(1);
+    expect(address[0].parts.name.semantic).to.equal('Patrick Star');
+    expect(address[0].parts.address.semantic).to.equal('patrick@bikini.bottom');
+  });
+
+  it('should format email address if multiple arrays are provided', function() {
+    var transport = mandrillTransport();
+    var address = transport.formatAddress(['Patrick Star <patrick@bikini.bottom>', 'SpongeBob SquarePants <spongebob@bikini.bottom>']);
+    expect(address[0].parts).to.be.an('object');
+    expect(address.length).to.equal(2);
+    expect(address[0].parts.name.semantic).to.equal('Patrick Star');
+    expect(address[0].parts.address.semantic).to.equal('patrick@bikini.bottom');
+    expect(address[1].parts.name.semantic).to.equal('SpongeBob SquarePants');
+    expect(address[1].parts.address.semantic).to.equal('spongebob@bikini.bottom');
+  });
+
+  it('should format email address if parameter is a string', function() {
+    var transport = mandrillTransport();
+    var address = transport.formatAddress('Patrick Star <patrick@bikini.bottom>');
+    expect(address[0].parts).to.be.an('object');
+    expect(address.length).to.equal(1);
+    expect(address[0].parts.name.semantic).to.equal('Patrick Star');
+    expect(address[0].parts.address.semantic).to.equal('patrick@bikini.bottom');
+  });
+
   describe('#send', function(done) {
     var transport = mandrillTransport();
     var client = transport.mandrillClient;
