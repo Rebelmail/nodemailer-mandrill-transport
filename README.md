@@ -83,3 +83,16 @@ var imgBuff = fs.readFileSync('path/to/file');
 imgBuff.toString('base64');
 ```
 
+## Using Mandrill Templates
+
+To send email using templates stored on Mandrill:
+
+```javascript
+transport.sendMail({
+  mandrillOptions: {
+    template_name: 'MANDRILL_TEMPLATE_SLUG'
+  }
+}, /* ... */);
+```
+
+

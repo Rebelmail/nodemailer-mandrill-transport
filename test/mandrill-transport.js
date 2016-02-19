@@ -31,7 +31,8 @@ describe('MandrillTransport', function() {
     };
 
     var status;
-    var stub = sinon.stub(client.messages, 'send', function(data, resolve) {
+
+    function messageSentCallback(data, resolve) {
       var message = data.message;
       expect(message).to.exist;
       expect(message.to.length).to.equal(6);
@@ -58,21 +59,26 @@ describe('MandrillTransport', function() {
       expect(message.html).to.equal('<p>Meow!</p>');
 
       resolve([{ _id: 'fake-id', status: status }]);
-    });
+    }
+
+    var sendStub = sinon.stub(client.messages, 'send', messageSentCallback);
+    var sendTemplateStub = sinon.stub(client.messages, 'sendTemplate', messageSentCallback);
 
     after(function() {
-      stub.restore();
+      sendStub.restore();
+      sendTemplateStub.restore();
     });
 
     afterEach(function() {
-      stub.reset();
+      sendStub.reset();
+      sendTemplateStub.reset();
     });
 
     it('sent response', function(done) {
       status = 'sent';
       transport.send(payload, function(err, info) {
         expect(err).to.not.exist;
-        expect(stub.calledOnce).to.be.true;
+        expect(sendStub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(1);
         expect(info.rejected.length).to.equal(0);
         expect(info.messageId).to.equal('fake-id');
@@ -84,7 +90,7 @@ describe('MandrillTransport', function() {
       status = 'queued';
       transport.send(payload, function(err, info) {
         expect(err).to.not.exist;
-        expect(stub.calledOnce).to.be.true;
+        expect(sendStub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(1);
         expect(info.rejected.length).to.equal(0);
         expect(info.messageId).to.equal('fake-id');
@@ -96,7 +102,7 @@ describe('MandrillTransport', function() {
       status = 'scheduled';
       transport.send(payload, function(err, info) {
         expect(err).to.not.exist;
-        expect(stub.calledOnce).to.be.true;
+        expect(sendStub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(1);
         expect(info.rejected.length).to.equal(0);
         expect(info.messageId).to.equal('fake-id');
@@ -108,7 +114,7 @@ describe('MandrillTransport', function() {
       status = 'invalid';
       transport.send(payload, function(err, info) {
         expect(err).to.not.exist;
-        expect(stub.calledOnce).to.be.true;
+        expect(sendStub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(0);
         expect(info.rejected.length).to.equal(1);
         done();
@@ -119,7 +125,7 @@ describe('MandrillTransport', function() {
       status = 'rejected';
       transport.send(payload, function(err, info) {
         expect(err).to.not.exist;
-        expect(stub.calledOnce).to.be.true;
+        expect(sendStub.calledOnce).to.be.true;
         expect(info.accepted.length).to.equal(0);
         expect(info.rejected.length).to.equal(1);
         done();
@@ -133,15 +139,28 @@ describe('MandrillTransport', function() {
         }
       };
 
-      stub.restore();
-      stub = sinon.stub(client.messages, 'send', function(data, resolve) {
+      sendStub.restore();
+      sendStub = sinon.stub(client.messages, 'send', function(data, resolve) {
         expect(data.message.preserve_recipients).to.be.true;
         resolve([{ _id: 'fake-id', status: 'sent' }]);
       });
 
       transport.send(payload, function(err) {
         expect(err).to.not.exist;
-        expect(stub.calledOnce).to.be.true;
+        expect(sendStub.calledOnce).to.be.true;
+        done();
+      });
+    });
+
+    it('use a mandrill template', function(done) {
+      payload.data.mandrillOptions = {
+        template_name: 'krusty-krab-newsletter'
+      };
+
+      transport.send(payload, function(err) {
+        expect(err).to.not.exist;
+        expect(sendStub.calledOnce).to.be.false;
+        expect(sendTemplateStub.calledOnce).to.be.true;
         done();
       });
     });
