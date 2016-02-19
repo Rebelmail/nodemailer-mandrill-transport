@@ -57,16 +57,17 @@ To send images as attachments:
 transport.sendMail({
   mandrillOptions: {
     images: [
-      "type": "image/png",
-      "name": "IMAGECID",
-      "content": "ZXhhbXBsZSBmaWxl",
+      'type': 'image/png',
+      'name': 'IMAGECID',
+      'content': 'ZXhhbXBsZSBmaWxl',
     ],
   }
 }, /* ... */);
 ```
 
 **name**: image cid:
-Reference your attached image in your html like:
+
+Reference your attached image in your HTML:
 
 ```html
 <img src="IMAGECID">
@@ -94,5 +95,3 @@ transport.sendMail({
   }
 }, /* ... */);
 ```
-
-
