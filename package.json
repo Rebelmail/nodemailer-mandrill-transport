@@ -21,13 +21,13 @@
   },
   "homepage": "https://github.com/RebelMail/nodemailer-mandrill-transport",
   "dependencies": {
-    "email-addresses": "^2.0.1",
+    "addressparser": "^1.0.1",
     "extend": "^3.0.0",
     "mandrill-api": "^1.0.45"
   },
   "devDependencies": {
-    "chai": "^3.4.1",
-    "mocha": "^2.3.4",
-    "sinon": "^1.17.2"
+    "chai": "^3.5.0",
+    "mocha": "^2.4.5",
+    "sinon": "^1.17.3"
   }
 }
