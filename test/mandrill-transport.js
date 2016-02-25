@@ -1,11 +1,9 @@
 'use strict';
 
-var sinon = require('sinon');
-var expect = require('chai').expect;
-
-var mandrillTransport = require('../');
-
-var packageData = require('../package.json');
+var sinon = require('sinon'),
+  expect = require('chai').expect,
+  mandrillTransport = require('../'),
+  packageData = require('../package.json');
 
 describe('MandrillTransport', function() {
   it('should expose name and version', function() {
@@ -14,7 +12,7 @@ describe('MandrillTransport', function() {
     expect(transport.version).to.equal(packageData.version);
   });
 
-  describe('#send', function(done) {
+  describe('#send', function() {
     var transport = mandrillTransport();
     var client = transport.mandrillClient;
 
@@ -161,6 +159,69 @@ describe('MandrillTransport', function() {
         expect(err).to.not.exist;
         expect(sendStub.calledOnce).to.be.false;
         expect(sendTemplateStub.calledOnce).to.be.true;
+        done();
+      });
+    });
+  });
+
+  describe('#send attachments usage', function() {
+    var nodemailer = require('nodemailer'),
+      transport = mandrillTransport(),
+      client = transport.mandrillClient,
+      wrappedTransport = nodemailer.createTransport(transport),
+      sendOptions;
+
+    before(function() {
+      sinon.stub(client.messages, 'send', function(options, cb) {
+        sendOptions = options;
+        cb([]);
+      });
+    });
+
+    beforeEach(function() {
+      sendOptions = {};
+    });
+
+    after(function() {
+      client.messages.send.restore();
+    });
+
+    it('attachment object', function(done) {
+      wrappedTransport.sendMail({
+        from: '"Sender Name" <sender@server.com>',
+        to: ['a@b.com', 'c@d.com'],
+        subject: 'subject',
+        text: 'text',
+        attachments: [
+          {   // utf-8 string as an attachment
+            filename: 'text1.txt',
+            content: 'hello world!'
+          },
+          {   // binary buffer as an attachment
+            filename: 'text2.txt',
+            content: new Buffer('hello world!', 'utf-8')
+          },
+          {   // define custom content type for the attachment
+            filename: 'text.bin',
+            content: 'hello world!',
+            contentType: 'text/csv'
+          },
+          {   // use URL as an attachment
+            filename: 'license.txt',
+            path: 'https://raw.github.com/nodemailer/nodemailer/master/LICENSE'
+          },
+          {   // encoded string as an attachment
+            filename: 'text64.txt',
+            content: 'this will be encoded',
+            encoding: 'base64'
+          },
+          {   // data uri as an attachment
+            path: 'data:text/plain;base64,aGVsbG8gd29ybGQ='
+          }
+        ]
+      }, function(err, what) {
+        console.log(err, what);
+        console.log(sendOptions);
         done();
       });
     });
