@@ -188,10 +188,10 @@ describe('MandrillTransport', function() {
 
     it('attachment object', function(done) {
       wrappedTransport.sendMail({
-        from: '"Sender Name" <sender@server.com>',
-        to: ['a@b.com', 'c@d.com'],
-        subject: 'subject',
-        text: 'text',
+        //from: '"Sender Name" <sender@server.com>',
+        //to: ['a@b.com', 'c@d.com'],
+        //subject: 'subject',
+        //text: 'text',
         attachments: [
           {   // utf-8 string as an attachment
             filename: 'text1.txt',
@@ -211,17 +211,27 @@ describe('MandrillTransport', function() {
             path: 'https://raw.github.com/nodemailer/nodemailer/master/LICENSE'
           },
           {   // encoded string as an attachment
-            filename: 'text64.txt',
+            filename: 'textToBase64.txt',
             content: 'this will be encoded',
+            encoding: 'base64'
+          },
+          {   // encoded string as an attachment
+            filename: 'textAsBase64.txt',
+            content: new Buffer('i am base63', 'utf-8').toString('base64'),
             encoding: 'base64'
           },
           {   // data uri as an attachment
             path: 'data:text/plain;base64,aGVsbG8gd29ybGQ='
           }
         ]
-      }, function(err, what) {
-        console.log(err, what);
-        console.log(sendOptions);
+      }, function(err) {
+        expect(err).to.be.null;
+        expect(sendOptions.message.attachments).to.have.lengthOf(7);
+        console.log(sendOptions.message.attachments);
+        // TODO check out content of attachments
+        //   Remember mandrill only accepts base-64 encoded string as content
+
+        // TODO test if given path/filestream is transformed into a base64 string
         done();
       });
     });
