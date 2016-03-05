@@ -186,52 +186,46 @@ describe('MandrillTransport', function() {
       client.messages.send.restore();
     });
 
-    it('attachment object', function(done) {
+    it('attachments object', function(done) {
       wrappedTransport.sendMail({
-        //from: '"Sender Name" <sender@server.com>',
-        //to: ['a@b.com', 'c@d.com'],
-        //subject: 'subject',
-        //text: 'text',
         attachments: [
-          {   // utf-8 string as an attachment
-            filename: 'text1.txt',
-            content: 'hello world!'
-          },
-          {   // binary buffer as an attachment
-            filename: 'text2.txt',
+          {
+            filename: 'bufferIsABase64.txt',
             content: new Buffer('hello world!', 'utf-8')
           },
-          {   // define custom content type for the attachment
-            filename: 'text.bin',
-            content: 'hello world!',
+          {
+            filename: 'text.csv',
+            content: new Buffer('hello;world!\n1;2','utf-8'),
             contentType: 'text/csv'
           },
-          {   // use URL as an attachment
-            filename: 'license.txt',
-            path: 'https://raw.github.com/nodemailer/nodemailer/master/LICENSE'
-          },
-          {   // encoded string as an attachment
-            filename: 'textToBase64.txt',
-            content: 'this will be encoded',
-            encoding: 'base64'
-          },
-          {   // encoded string as an attachment
-            filename: 'textAsBase64.txt',
-            content: new Buffer('i am base63', 'utf-8').toString('base64'),
+          {
+            filename: 'encoded.txt',
+            content: new Buffer('i am base64', 'utf-8').toString('base64'),
             encoding: 'base64'
           },
           {   // data uri as an attachment
-            path: 'data:text/plain;base64,aGVsbG8gd29ybGQ='
+            path: 'data:text/plain;base64,' + new Buffer('HELLOWORLD', 'utf-8').toString('base64')
           }
         ]
       }, function(err) {
         expect(err).to.be.null;
-        expect(sendOptions.message.attachments).to.have.lengthOf(7);
-        console.log(sendOptions.message.attachments);
-        // TODO check out content of attachments
-        //   Remember mandrill only accepts base-64 encoded string as content
+        expect(sendOptions.message.attachments).to.have.lengthOf(4);
 
-        // TODO test if given path/filestream is transformed into a base64 string
+        expect(sendOptions.message.attachments[0].name).to.equal('bufferIsABase64.txt');
+        expect(sendOptions.message.attachments[0].type).to.equal('text/plain');
+        expect(new Buffer(sendOptions.message.attachments[0].content, 'base64').toString('utf-8')).to.equal('hello world!');
+
+        expect(sendOptions.message.attachments[1].name).to.equal('text.csv');
+        expect(sendOptions.message.attachments[1].type).to.equal('text/csv');
+        expect(new Buffer(sendOptions.message.attachments[1].content, 'base64').toString('utf-8')).to.equal('hello;world!\n1;2');
+
+        expect(sendOptions.message.attachments[2].name).to.equal('encoded.txt');
+        expect(sendOptions.message.attachments[2].type).to.equal('text/plain');
+        expect(new Buffer(sendOptions.message.attachments[2].content, 'base64').toString('utf-8')).to.equal('i am base64');
+
+        expect(sendOptions.message.attachments[3].name).to.equal('attachment-4.txt');
+        expect(sendOptions.message.attachments[3].type).to.equal('text/plain');
+        expect(new Buffer(sendOptions.message.attachments[3].content, 'base64').toString('utf-8')).to.equal('HELLOWORLD');
         done();
       });
     });
