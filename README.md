@@ -49,6 +49,12 @@ transport.sendMail({
 }, /* ... */);
 ```
 
+## Attachments
+
+The content of attachments **must** be a base64 encoded string.
+Examples of this can be found in the test file.
+
+
 ## Sending Images to Mandrill
 
 To send images as attachments:
