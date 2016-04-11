@@ -188,6 +188,13 @@ describe('MandrillTransport', function() {
 
     it('attachments object', function(done) {
       wrappedTransport.sendMail({
+        from: 'Gary the Snail <gary@bikini.bottom>',
+        to: 'SpongeBob SquarePants <spongebob@bikini.bottom>, patrick@bikini.bottom',
+        cc: 'Squidward Tentacles <squidward@bikini.bottom>',
+        bcc: 'krabs@bikini.bottom',
+        subject: 'Meow...',
+        text: 'Meow!',
+        html: '<p>Meow!</p>',
         attachments: [
           {
             filename: 'bufferIsABase64.txt',
@@ -209,6 +216,23 @@ describe('MandrillTransport', function() {
         ]
       }, function(err) {
         expect(err).to.be.null;
+        var message = sendOptions.message;
+        expect(message.from_name).to.equal('Gary the Snail');
+        expect(message.from_email).to.equal('gary@bikini.bottom');
+        expect(message.to[0].name).to.equal('SpongeBob SquarePants');
+        expect(message.to[0].email).to.equal('spongebob@bikini.bottom');
+        expect(message.to[1].name).to.equal('');
+        expect(message.to[1].email).to.equal('patrick@bikini.bottom');
+        expect(message.to[2].type).to.equal('cc');
+        expect(message.to[2].name).to.equal('Squidward Tentacles');
+        expect(message.to[2].email).to.equal('squidward@bikini.bottom');
+        expect(message.to[3].type).to.equal('bcc');
+        expect(message.to[3].name).to.equal('');
+        expect(message.to[3].email).to.equal('krabs@bikini.bottom');
+        expect(message.subject).to.equal('Meow...');
+        expect(message.text).to.equal('Meow!');
+        expect(message.html).to.equal('<p>Meow!</p>');
+
         expect(sendOptions.message.attachments).to.have.lengthOf(4);
 
         expect(sendOptions.message.attachments[0].name).to.equal('bufferIsABase64.txt');
