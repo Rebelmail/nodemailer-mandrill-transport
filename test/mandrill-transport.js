@@ -14,7 +14,7 @@ describe('MandrillTransport', function() {
     expect(transport.version).to.equal(packageData.version);
   });
 
-  describe('#send', function(done) {
+  describe('#send', function() {
     var transport = mandrillTransport();
     var client = transport.mandrillClient;
 
@@ -161,6 +161,97 @@ describe('MandrillTransport', function() {
         expect(err).to.not.exist;
         expect(sendStub.calledOnce).to.be.false;
         expect(sendTemplateStub.calledOnce).to.be.true;
+        done();
+      });
+    });
+  });
+
+  describe('#send attachments usage', function() {
+    var nodemailer = require('nodemailer'),
+      transport = mandrillTransport(),
+      client = transport.mandrillClient,
+      wrappedTransport = nodemailer.createTransport(transport),
+      sendOptions;
+
+    before(function() {
+      sinon.stub(client.messages, 'send', function(options, cb) {
+        sendOptions = options;
+        cb([]);
+      });
+    });
+
+    beforeEach(function() {
+      sendOptions = {};
+    });
+
+    after(function() {
+      client.messages.send.restore();
+    });
+
+    it('attachments object', function(done) {
+      wrappedTransport.sendMail({
+        from: 'Gary the Snail <gary@bikini.bottom>',
+        to: 'SpongeBob SquarePants <spongebob@bikini.bottom>, patrick@bikini.bottom',
+        cc: 'Squidward Tentacles <squidward@bikini.bottom>',
+        bcc: 'krabs@bikini.bottom',
+        subject: 'Meow...',
+        text: 'Meow!',
+        html: '<p>Meow!</p>',
+        attachments: [
+          {
+            filename: 'bufferIsABase64.txt',
+            content: new Buffer('hello world!', 'utf-8')
+          },
+          {
+            filename: 'text.csv',
+            content: new Buffer('hello;world!\n1;2', 'utf-8'),
+            contentType: 'text/csv'
+          },
+          {
+            filename: 'encoded.txt',
+            content: new Buffer('i am base64', 'utf-8').toString('base64'),
+            encoding: 'base64'
+          },
+          {   // data uri as an attachment
+            path: 'data:text/plain;base64,' + new Buffer('HELLOWORLD', 'utf-8').toString('base64')
+          }
+        ]
+      }, function(err) {
+        expect(err).to.be.null;
+        var message = sendOptions.message;
+        expect(message.from_name).to.equal('Gary the Snail');
+        expect(message.from_email).to.equal('gary@bikini.bottom');
+        expect(message.to[0].name).to.equal('SpongeBob SquarePants');
+        expect(message.to[0].email).to.equal('spongebob@bikini.bottom');
+        expect(message.to[1].name).to.equal('');
+        expect(message.to[1].email).to.equal('patrick@bikini.bottom');
+        expect(message.to[2].type).to.equal('cc');
+        expect(message.to[2].name).to.equal('Squidward Tentacles');
+        expect(message.to[2].email).to.equal('squidward@bikini.bottom');
+        expect(message.to[3].type).to.equal('bcc');
+        expect(message.to[3].name).to.equal('');
+        expect(message.to[3].email).to.equal('krabs@bikini.bottom');
+        expect(message.subject).to.equal('Meow...');
+        expect(message.text).to.equal('Meow!');
+        expect(message.html).to.equal('<p>Meow!</p>');
+
+        expect(sendOptions.message.attachments).to.have.lengthOf(4);
+
+        expect(sendOptions.message.attachments[0].name).to.equal('bufferIsABase64.txt');
+        expect(sendOptions.message.attachments[0].type).to.equal('text/plain');
+        expect(new Buffer(sendOptions.message.attachments[0].content, 'base64').toString('utf-8')).to.equal('hello world!');
+
+        expect(sendOptions.message.attachments[1].name).to.equal('text.csv');
+        expect(sendOptions.message.attachments[1].type).to.equal('text/csv');
+        expect(new Buffer(sendOptions.message.attachments[1].content, 'base64').toString('utf-8')).to.equal('hello;world!\n1;2');
+
+        expect(sendOptions.message.attachments[2].name).to.equal('encoded.txt');
+        expect(sendOptions.message.attachments[2].type).to.equal('text/plain');
+        expect(new Buffer(sendOptions.message.attachments[2].content, 'base64').toString('utf-8')).to.equal('i am base64');
+
+        expect(sendOptions.message.attachments[3].name).to.equal('attachment-4.txt');
+        expect(sendOptions.message.attachments[3].type).to.equal('text/plain');
+        expect(new Buffer(sendOptions.message.attachments[3].content, 'base64').toString('utf-8')).to.equal('HELLOWORLD');
         done();
       });
     });
