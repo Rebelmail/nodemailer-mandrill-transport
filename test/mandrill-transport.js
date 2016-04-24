@@ -1,9 +1,11 @@
 'use strict';
 
-var sinon = require('sinon'),
-  expect = require('chai').expect,
-  mandrillTransport = require('../'),
-  packageData = require('../package.json');
+var sinon = require('sinon');
+var expect = require('chai').expect;
+
+var mandrillTransport = require('../');
+
+var packageData = require('../package.json');
 
 describe('MandrillTransport', function() {
   it('should expose name and version', function() {
@@ -202,7 +204,7 @@ describe('MandrillTransport', function() {
           },
           {
             filename: 'text.csv',
-            content: new Buffer('hello;world!\n1;2','utf-8'),
+            content: new Buffer('hello;world!\n1;2', 'utf-8'),
             contentType: 'text/csv'
           },
           {
