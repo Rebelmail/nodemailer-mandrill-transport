@@ -21,6 +21,7 @@ describe('MandrillTransport', function() {
     var payload = {
       data: {
         to: 'SpongeBob SquarePants <spongebob@bikini.bottom>, Patrick Star <patrick@bikini.bottom>',
+        replyTo: 'gary+replies@bikini.bottom',
         cc: 'Squidward Tentacles <squidward@bikini.bottom>, Sandy Cheeks <sandy@bikini.bottom>',
         bcc: 'Mr. Krabs <krabs@bikini.bottom>, Plankton <plankton@bikini.bottom>',
         from: 'Gary the Snail <gary@bikini.bottom>',
@@ -57,6 +58,7 @@ describe('MandrillTransport', function() {
       expect(message.subject).to.equal('Meow...');
       expect(message.text).to.equal('Meow!');
       expect(message.html).to.equal('<p>Meow!</p>');
+      expect(message.headers['Reply-To']).to.equal('gary+replies@bikini.bottom');
 
       resolve([{ _id: 'fake-id', status: status }]);
     }
