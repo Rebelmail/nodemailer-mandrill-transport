@@ -2,8 +2,9 @@
 
 A Mandrill transport for Nodemailer.
 
-[![Build Status](https://travis-ci.org/Rebelmail/nodemailer-mandrill-transport.svg?branch=sm-readme)](https://travis-ci.org/Rebelmail/nodemailer-mandrill-transport)
-[![NPM version](https://badge.fury.io/js/nodemailer-mandrill-transport.png)](http://badge.fury.io/js/nodemailer-mandrill-transport)
+[![Build Status](https://travis-ci.org/Rebelmail/nodemailer-mandrill-transport.svg?branch=master)](https://travis-ci.org/Rebelmail/nodemailer-mandrill-transport)
+[![Coverage Status](https://coveralls.io/repos/github/Rebelmail/nodemailer-mandrill-transport/badge.svg?branch=master)](https://coveralls.io/github/Rebelmail/nodemailer-mandrill-transport?branch=master)
+[![npm version](https://badge.fury.io/js/nodemailer-mandrill-transport.svg)](https://badge.fury.io/js/nodemailer-mandrill-transport)
 
 ## Example
 
