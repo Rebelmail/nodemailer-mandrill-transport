@@ -41,7 +41,9 @@ transport.sendMail({
 
 It is possible to use any Messages Send Mandrill API option by passing it into
 the `mandrillOptions` option. These will be deeply merged over the API call this
-transport builds for you. For example, this transport enables the `async` option
+transport builds for you. See https://mandrillapp.com/api/docs/messages.nodejs.html for documentation.
+
+For example, this transport enables the `async` option
 by default. To disable this,
 
 ```javascript
@@ -52,38 +54,67 @@ transport.sendMail({
 }, /* ... */);
 ```
 
-## Sending Images to Mandrill
+## Sending attachments with Mandrill
+```javascript
+transport.sendMail({
+  /* from, to, etc. */
+  mandrillOptions: {
+    message: {
+      attachments: [
+        {
+          type: 'text/plain',
+          name: 'hello.txt',
+          content: new Buffer('Hello World!').toString('base64')
+        }
+      ]
+    }
+  }
+});
+```
+
+**type**: Content MIME-type:
+'text/plain', 'image/jpeg', 'image/png' etc. 
+
+**name**: Name of the file as it will be shown in the attachments in the sent email
+
+**content**: Base64 encoded string. An easy way to do this is to use `Buffer` with `toString('base64')`. 
+
+## Sending images with Mandrill
 
 To send images as attachments:
 
 ```javascript
 transport.sendMail({
+  /* from, to, etc. */
   mandrillOptions: {
-    images: [
-      'type': 'image/png',
-      'name': 'IMAGECID',
-      'content': 'ZXhhbXBsZSBmaWxl',
-    ],
+    message: {
+      images: [
+        {
+          type: 'image/png',
+          name: 'unique_identifier_reference',
+          content: require('fs').readFileSync('path/to/image.png').toString('base64')
+        }
+      ]
+    }
   }
-}, /* ... */);
+});
 ```
+**type**: Image MIME-type:
+'image/jpg', 'image/png' etc.
 
-**name**: image cid:
-
-Reference your attached image in your HTML:
+**name**: A unique identifier which will be used to reference your attached image in your HTML. Notice the required `cid:` before the identifier:
 
 ```html
-<img src="IMAGECID">
+<img src="cid:unique_identifier_reference">
 ```
 
-Make sure to use unique cids for your images!
+Make sure to use unique identifiers for your images!
 
-**content**: a base64 representation of your image.
+**content**: a base64 representation of your image. An easy way to do this is to use `Buffer` with `toString('base64')`. 
 
 ```javascript
 var fs = require('fs');
 var imgBuff = fs.readFileSync('path/to/file');
-
 imgBuff.toString('base64');
 ```
 
@@ -93,8 +124,9 @@ To send email using templates stored on Mandrill:
 
 ```javascript
 transport.sendMail({
+  /* from, to, etc. */
   mandrillOptions: {
     template_name: 'MANDRILL_TEMPLATE_SLUG'
   }
-}, /* ... */);
+});
 ```
