@@ -204,10 +204,14 @@ describe('MandrillTransport', function() {
         address: 'gary@bikini.bottom'
       }
 
-      transport.send(payload, function(err) {
+      status = 'sent';
+
+      transport.send(payload, function(err, info) {
         expect(err).to.not.exist;
         expect(sendStub.calledOnce).to.be.false;
-        expect(sendTemplateStub.calledOnce).to.be.true;
+        expect(info.accepted.length).to.equal(1);
+        expect(info.rejected.length).to.equal(0);
+        expect(info.messageId).to.equal('fake-id');
         done();
       });
     })
