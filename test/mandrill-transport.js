@@ -164,5 +164,52 @@ describe('MandrillTransport', function() {
         done();
       });
     });
+
+    it('allows addresses as arrays and objects', function (done) {
+      payload.data.to = [
+        {
+          name: 'SpongeBob SquarePants',
+          address: 'spongebob@bikini.bottom'
+        },
+        {
+          name: 'Patrick Star',
+          address: 'patrick@bikini.bottom'
+        }
+      ]
+
+      payload.data.cc = [
+        {
+          name: 'Squidward Tentacles',
+          address: 'squidward@bikini.bottom'
+        },
+        {
+          name: 'Sandy Cheeks',
+          address: 'sandy@bikini.bottom'
+        }
+      ]
+
+      payload.data.bcc = [
+        {
+          name: 'Mr. Krabs',
+          address: 'krabs@bikini.bottom'
+        },
+        {
+          name: 'Plankton',
+          address: 'plankton@bikini.bottom',
+        }
+      ];
+
+      payload.data.from = {
+        name: 'Gary the Snail',
+        address: 'gary@bikini.bottom'
+      }
+
+      transport.send(payload, function(err) {
+        expect(err).to.not.exist;
+        expect(sendStub.calledOnce).to.be.false;
+        expect(sendTemplateStub.calledOnce).to.be.true;
+        done();
+      });
+    })
   });
 });
