@@ -182,17 +182,11 @@ describe('MandrillTransport', function() {
           name: 'Squidward Tentacles',
           address: 'squidward@bikini.bottom'
         },
-        {
-          name: 'Sandy Cheeks',
-          address: 'sandy@bikini.bottom'
-        }
+        'Sandy Cheeks <sandy@bikini.bottom>'
       ]
 
       payload.data.bcc = [
-        {
-          name: 'Mr. Krabs',
-          address: 'krabs@bikini.bottom'
-        },
+        'Mr. Krabs <krabs@bikini.bottom>',
         {
           name: 'Plankton',
           address: 'plankton@bikini.bottom',
