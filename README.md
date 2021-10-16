@@ -59,11 +59,13 @@ To send images as attachments:
 ```javascript
 transport.sendMail({
   mandrillOptions: {
-    images: [
-      'type': 'image/png',
-      'name': 'IMAGECID',
-      'content': 'ZXhhbXBsZSBmaWxl',
-    ],
+    message {
+      images: [
+        'type': 'image/png',
+        'name': 'IMAGECID',
+        'content': 'ZXhhbXBsZSBmaWxl',
+      ],
+    }
   }
 }, /* ... */);
 ```
