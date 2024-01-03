@@ -14,7 +14,7 @@ describe('MandrillTransport', function() {
     expect(transport.version).to.equal(packageData.version);
   });
 
-  describe('#send', function(done) {
+  describe('#send', function(/* done */) {
     var transport = mandrillTransport();
     var client = transport.mandrillClient;
 
@@ -164,5 +164,51 @@ describe('MandrillTransport', function() {
         done();
       });
     });
+
+    it('allows addresses as arrays and objects',
+      function (done) {
+        payload.data.to = [
+          {
+            name: 'SpongeBob SquarePants',
+            address: 'spongebob@bikini.bottom'
+          },
+          {
+            name: 'Patrick Star',
+            address: 'patrick@bikini.bottom'
+          }
+        ];
+
+        payload.data.cc = [
+          {
+            name: 'Squidward Tentacles',
+            address: 'squidward@bikini.bottom'
+          },
+          'Sandy Cheeks <sandy@bikini.bottom>'
+        ];
+
+        payload.data.bcc = [
+          'Mr. Krabs <krabs@bikini.bottom>',
+          {
+            name: 'Plankton',
+            address: 'plankton@bikini.bottom',
+          }
+        ];
+
+        payload.data.from = {
+          name: 'Gary the Snail',
+          address: 'gary@bikini.bottom'
+        };
+
+        status = 'sent';
+
+        transport.send(payload, function (err, info) {
+          expect(err).to.not.exist;
+          expect(sendStub.calledOnce).to.be.false;
+          expect(info.accepted.length).to.equal(1);
+          expect(info.rejected.length).to.equal(0);
+          expect(info.messageId).to.equal('fake-id');
+          done();
+        });
+      });
   });
 });
