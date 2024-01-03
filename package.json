@@ -1,6 +1,6 @@
 {
   "name": "nodemailer-mandrill-transport",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Mandrill transport for Nodemailer",
   "main": "index.js",
   "scripts": {
